@@ -9,9 +9,9 @@ class index:
         pass
 
 	def buildIndex(self):
-		#function to read documents from collection, tokenize and build the index with tokens
-		#index should also contain positional information of the terms in the document --- term: [(ID1,[pos1,pos2,..]), (ID2, [pos1,pos2,…]),….]
-		#use unique document IDs
+        #function to read documents from collection, tokenize and build the index with tokens
+        #index should also contain positional information of the terms in the document --- term: [(ID1,[pos1,pos2,..]), (ID2, [pos1,pos2,…]),….]
+        #use unique document IDs
         pass
 
 	def and_query(self, query_terms):
