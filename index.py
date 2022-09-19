@@ -14,7 +14,12 @@ class index:
         #use unique document IDs
 
         """
-        1. F
+        1. Tokenize
+            a. For each document in collection
+                - Open the document
+                - Get each token and its position, ignoring punctuation and numerals
+                - Make token lowercase
+                - map[term].append((ID1, [pos1, pos2, pos3]))
         """
         pass
 
