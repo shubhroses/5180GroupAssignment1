@@ -21,7 +21,6 @@ class index:
                 - Make token lowercase
                 - map[term].append((ID1, [pos1, pos2, pos3]))
         """
-        pass
 
     def and_query(self, query_terms):
 	    #function for identifying relevant docs using the index
