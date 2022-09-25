@@ -65,7 +65,7 @@ class index:
         if not B:
             return A
 
-        a = b = 0
+        a = b = 0sedr
         res = []
         while a < len(A) and b < len(B):
             if A[a][0] > B[b][0]:
