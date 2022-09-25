@@ -61,7 +61,7 @@ class index:
         endTime = time.time()
         print(f"Index built in {endTime - startTime} seconds.", file=o)
 
-    def mergeTwo(self, A, B):
+    def merge_two(self, A, B):
         if not B:
             return A
 
@@ -89,7 +89,7 @@ class index:
                 if i == len(pl) - 1:
                     temp.append(pl[i])
                 else:
-                    temp.append(self.mergeTwo(pl[i], pl[i+1]))
+                    temp.append(self.merge_two(pl[i], pl[i+1]))
             pl = temp
 
         res = []
