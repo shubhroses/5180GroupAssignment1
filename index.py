@@ -18,11 +18,13 @@ class index:
         terms = []
         with open(self.path + "/" + f) as file:
             line = file.readline()
+            i = 0
             while line:
                 # Regex to match only strings and spaces 
                 line = re.sub(r'[^A-Za-z\s]+', '', line)
-                for i, word in enumerate(line.split()):
-                    terms.append((word.lower(), file.tell()+i))
+                for word in line.split():
+                    terms.append((word.lower(), i))
+                    i += 1
                 line = file.readline() 
         return terms
 
