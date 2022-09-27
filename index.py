@@ -65,16 +65,16 @@ class index:
         print(f"Index built in {endTime - startTime} seconds.", file=o)
 
     def merge_two(self, A, B):
-        if not B:
-            return A
-
+        # Pointer for each posting list
         a = b = 0
         res = []
         while a < len(A) and b < len(B):
+            # If documents not equal, increment pointer to lower documnet
             if A[a][0] > B[b][0]:
                 b += 1
             elif A[a][0] < B[b][0]:
                 a += 1
+            # If documents equal, add to result
             else:
                 res.append((A[a][0], []))
                 a += 1
