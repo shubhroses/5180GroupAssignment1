@@ -106,8 +106,9 @@ class index:
 
         # Convert each document id in posting list to actual document name
         res = []
-        for d, a in pl[0]:
-            res.append(self.indToDoc[d])
+        if pl:
+            for d, a in pl[0]:
+                res.append(self.indToDoc[d])
         
         queryTimeEnd = time.time()
 
@@ -137,7 +138,7 @@ x = a.and_query(['with', 'without', 'yemen'])
 x = a.and_query(['with', 'without', 'yemen', 'yemeni'])
 x = a.and_query(['dog'])
 x = a.and_query(['italian', 'restaurants'])
-x = a.and_query(['pacific'])
+x = a.and_query([])
 o.close()
 
 # x = a.print_dict()

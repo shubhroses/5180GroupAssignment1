@@ -1,4 +1,5 @@
-Index built in 0.29677414894104004 seconds.
+
+Index built in 0.2540018558502197 seconds.
 Results for the Query: with AND without AND yemen
 Total Docs retrieved: 6
 Text-159.txt
@@ -7,12 +8,12 @@ Text-115.txt
 Text-117.txt
 Text-121.txt
 Text-99.txt
-Retreived in 0.00018525123596191406 seconds
+Retreived in 0.00016999244689941406 seconds
 Results for the Query: with AND without AND yemen AND yemeni
 Total Docs retrieved: 2
 Text-121.txt
 Text-99.txt
-Retreived in 0.00025391578674316406 seconds
+Retreived in 0.00010204315185546875 seconds
 Results for the Query: dog
 Total Docs retrieved: 6
 Text-413.txt
@@ -21,17 +22,12 @@ Text-86.txt
 Text-328.txt
 Text-273.txt
 Text-321.txt
-Retreived in 3.0994415283203125e-06 seconds
+Retreived in 2.1457672119140625e-06 seconds
 Results for the Query: italian AND restaurants
 Total Docs retrieved: 2
 Text-79.txt
 Text-136.txt
-Retreived in 7.867813110351562e-06 seconds
-Results for the Query: pacific
-Total Docs retrieved: 5
-Text-24.txt
-Text-133.txt
-Text-343.txt
-Text-193.txt
-Text-185.txt
-Retreived in 1.9073486328125e-06 seconds
+Retreived in 1.0967254638671875e-05 seconds
+Results for the Query: 
+Total Docs retrieved: 0
+Retreived in 0.0 seconds
