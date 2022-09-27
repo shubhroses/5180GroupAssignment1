@@ -43,6 +43,7 @@ class index:
         """
         startTime = time.time()
         for f in os.listdir(self.path):
+            # Assign each document a unique document ID
             self.indToDoc[self.curDocId] = f
 
             # Returns [(word, pos), (word, pos) ...]
@@ -83,23 +84,34 @@ class index:
     def and_query(self, query_terms):
 	    #function for identifying relevant docs using the index
         queryTimeStart = time.time()
+
+        # List of postringlists for each query term 
         pl = [self.postingList[q] for q in query_terms]
 
+        # Keep combining until one query list left 
         while len(pl) > 1:
             temp = []
+
+            # Iterate through pl with increments of 2 to pair up postringLists
             for i in range(0, len(pl), 2):
+
+                # If we are at last element, don't have another to pair with so just add it directly
                 if i == len(pl) - 1:
                     temp.append(pl[i])
+                # Merge the two postringlists and add to temp
                 else:
                     temp.append(self.merge_two(pl[i], pl[i+1]))
+            # Update postringList to be new combined lists
             pl = temp
 
+        # Convert each document id in posting list to actual document name
         res = []
         for d, a in pl[0]:
             res.append(self.indToDoc[d])
         
         queryTimeEnd = time.time()
 
+        # Print out what is required
         andStr = " AND ".join(query_terms)
         print(f"Results for the Query: {andStr}", file=o)
         print(f"Total Docs retrieved: {len(res)}", file=o)
