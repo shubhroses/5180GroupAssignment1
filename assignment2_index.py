@@ -35,8 +35,6 @@ class index:
         return terms
 
     def createOldPostingList(self):
-
-
         stopList = set()
         stopTuples = self.tokenize("stop-list.txt", ".")
         for t, p in stopTuples:
@@ -92,7 +90,6 @@ class index:
 
         self.convertDocumentsToVector()
 
-
     def cosine_similarity(self, v1,v2):
         "compute cosine similarity of v1 to v2: (v1 dot v2)/{||v1||*||v2||)"
         sumxx, sumxy, sumyy = 0, 0, 0
@@ -105,10 +102,8 @@ class index:
             return 0
         return sumxy/math.sqrt(sumxx*sumyy)
 
-    def exact_query(self, query_terms, k):
-        startTime = time.time()
+    def get_query_vector(self, query_terms):
         query_terms = [word.lower() for word in query_terms]
-
         termToFreq = {}
         for t in query_terms:
             termToFreq[t] = termToFreq.get(t, 0) + 1
@@ -119,9 +114,16 @@ class index:
                 w = 1 + math.log10(freq)
                 idf = self.newPostingList[self.termToId[term]][0]
                 queryVector[self.termToId[term]] = w*idf
+        return queryVector
+
+    def exact_query(self, query_terms, k):
+        startTime = time.time()
+        query_terms = [word.lower() for word in query_terms]
+
+        queryVector = self.get_query_vector(query_terms)
 
         docToSimilarity = []
-        for doc, vec in self.docToVec.items():
+        for doc, vec in self.docToVec.items(): # for champions list only look at 
             docToSimilarity.append((doc, self.cosine_similarity(queryVector, vec)))
         # for d, s in docToSimilarity:
         #     print(f"doc: {self.indToDoc[d]}, similarity: {s}")
@@ -130,7 +132,11 @@ class index:
         print(f"Query executed in {endTime - startTime} seconds.")
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
+
+    def inexact_query_champion(self, query_terms, k):
+        queryVector = self.get_query_vector(query_terms)
+
 a = index("collection")
 query_terms = ["a", "cat", "jumped"]
 
-print(a.exact_query(query_terms, 10))
+print(a.exact_query(query_terms, 2))
