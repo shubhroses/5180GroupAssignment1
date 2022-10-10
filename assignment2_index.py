@@ -284,6 +284,19 @@ class index:
 
         return [self.indToDoc[r] for r in result]
 
+    def print_dict(self):
+        #function to print the terms and posting list in the index
+        for k, v in self.newPostingList.items:
+            print(f"{k} : {v}")
+
+
+    def print_doc_list(self):
+	    # function to print the documents and their document id
+        for k, v in self.indToDoc.items:
+            print(f"ID:{k}, Doc:{v}")
+    
+
+
 
 a = index("collection")
 query_terms = ["a", "cat", "jumped"]
