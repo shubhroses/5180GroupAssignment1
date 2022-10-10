@@ -3,6 +3,7 @@ import os
 import collections
 import time
 import math
+import random
 
 class index:
     def __init__(self, path):
@@ -20,9 +21,15 @@ class index:
         self.r = 2
         self.docToVecChamp = {}
         self.champDocs = set()
+        self.leadersArr = []
+        self.leadersSet = set()
+        self.docToNearestLeader = {}
+        self.leaderAndFollowers = collections.defaultdict(list)
 
         self.createNewPostringList()
         self.createChampionList()
+        self.setLeaders()
+
 
 
     def tokenize(self, f, newPath):
@@ -228,6 +235,56 @@ class index:
         print(f"Query executed in {endTime - startTime} seconds.")
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
+    def setLeaders(self):
+        self.leadersArr = random.sample(range(0, len(self.indToDoc)), int(math.sqrt(len(self.indToDoc))))
+        self.leadersSet = set(self.leadersArr)
+
+        for doc in range(len(self.indToDoc)):
+            docVec = self.docToVec[doc]
+            distNearest = float("-inf")
+            nearest = None
+            for l in self.leadersArr:
+                newDist = self.cosine_similarity(docVec, self.docToVec[l])
+                if newDist >= distNearest:
+                    distNearest = newDist
+                    nearest = l
+            self.docToNearestLeader[doc] = nearest
+
+        for k, v in self.docToNearestLeader.items():
+            self.leaderAndFollowers[v].append(k)
+
+    def inexact_query_cluster_pruning(self, query_terms, k):
+        startTime = time.time()
+        queryVector = self.get_query_vector(query_terms)
+
+        leadersAndDist = []
+        for l in self.leadersArr:
+            v = self.docToVec[l]
+            distToQuery = self.cosine_similarity(v, queryVector)
+            leadersAndDist.append((l, distToQuery))
+        leadersAndDist.sort(key=lambda x:x[1])
+
+        res = []
+        k = 2
+        for l, dist in leadersAndDist:
+            cluster = self.leaderAndFollowers[l]
+            # Sort each element in cluster by distance to query vector
+            clusterDistToQuery = []
+            for n in cluster:
+                dist = self.cosine_similarity(self.docToVec[n], queryVector)
+                clusterDistToQuery.append((n, dist))
+            clusterDistToQuery.sort(key=lambda x:x[1])
+            res.extend([x[0] for x in clusterDistToQuery])
+            if len(res) >= k:
+                break
+        result = res[:k]
+
+        endTime = time.time()
+        print(f"Query executed in {endTime - startTime} seconds.")
+
+        return [self.indToDoc[r] for r in result]
+
+
 a = index("collection")
 query_terms = ["a", "cat", "jumped"]
 
@@ -235,3 +292,4 @@ query_terms = ["a", "cat", "jumped"]
 
 print(a.exact_query(query_terms, 2))
 print(a.inexact_query_index_elimination(query_terms, 2))
+print(a.inexact_query_cluster_pruning(query_terms, 2))
