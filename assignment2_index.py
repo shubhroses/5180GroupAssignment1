@@ -166,6 +166,7 @@ class index:
         return queryVector
 
     def inexact_query_champion(self, query_terms, x):
+        startTime = time.time()
         for k in self.champDocs:
             self.docToVecChamp[k] = len(self.idToTerm)*[float(0)]
 
@@ -183,11 +184,54 @@ class index:
         # for d, s in docToSimilarity:
         #     print(f"doc: {self.indToDoc[d]}, similarity: {s}")
         docToSimilarity.sort(key = lambda x:x[1], reverse=True)
+
+        endTime = time.time()
+        print(f"Query executed in {endTime - startTime} seconds.")
         return [self.indToDoc[t[0]] for t in docToSimilarity[:x]]
+
+    def get_query_vector_elimination(self, query_terms):
+        query_terms = [word.lower() for word in query_terms]
+
+        termToIDF = []
+        for term in query_terms:
+            if term in self.termToId:
+                termToIDF.append((term, self.newPostingList[self.termToId[term]][0]))
+
+        termToIDF.sort(key=lambda x:x[1], reverse=True)
+        query_terms = [tuple[0] for tuple in termToIDF[:len(termToIDF)//2]] 
+
+        termToFreq = {}
+        for t in query_terms:
+            termToFreq[t] = termToFreq.get(t, 0) + 1
+
+        queryVector = len(self.idToTerm)*[float(0)]
+        for term, freq in termToFreq.items():
+            if term in self.termToId:
+                w = 1 + math.log10(freq)
+                idf = self.newPostingList[self.termToId[term]][0]
+                queryVector[self.termToId[term]] = w*idf
+        return queryVector
+
+    def inexact_query_index_elimination(self, query_terms, k):
+        startTime = time.time()
+        query_terms = [word.lower() for word in query_terms]
+
+        queryVector = self.get_query_vector_elimination(query_terms)
+
+        docToSimilarity = []
+        for doc, vec in self.docToVec.items(): # for champions list only look at 
+            docToSimilarity.append((doc, self.cosine_similarity(queryVector, vec)))
+        # for d, s in docToSimilarity:
+        #     print(f"doc: {self.indToDoc[d]}, similarity: {s}")
+        docToSimilarity.sort(key = lambda x:x[1], reverse=True)
+        endTime = time.time()
+        print(f"Query executed in {endTime - startTime} seconds.")
+        return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
 a = index("collection")
 query_terms = ["a", "cat", "jumped"]
 
 # print(a.exact_query(query_terms, 2))
 
-print(a.inexact_query_champion(query_terms, 2))
+print(a.exact_query(query_terms, 2))
+print(a.inexact_query_index_elimination(query_terms, 2))
