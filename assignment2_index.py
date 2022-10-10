@@ -16,7 +16,13 @@ class index:
         self.docToVec = {}
         self.newPostingList = collections.defaultdict(list)
 
+        self.championsList = collections.defaultdict(list)
+        self.r = 2
+        self.docToVecChamp = {}
+        self.champDocs = set()
+
         self.createNewPostringList()
+        self.createChampionList()
 
 
     def tokenize(self, f, newPath):
@@ -132,11 +138,56 @@ class index:
         print(f"Query executed in {endTime - startTime} seconds.")
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
+    def createChampionList(self):
+        for k, v in self.newPostingList.items():
+            self.championsList[k].append(v[0])
+            docs = v[1:]
+            docs.sort(key = lambda x: x[1], reverse = True)
+            topR = docs[:self.r]
+            self.championsList[k].extend(topR)
+        
+        for k, v in self.championsList.items():
+            docs = v[1:]
+            justDocs = [d[0] for d in docs]
+            self.champDocs = self.champDocs.union(set(justDocs))
 
-    def inexact_query_champion(self, query_terms, k):
-        queryVector = self.get_query_vector(query_terms)
+    def get_query_vector_champ(self, query_terms):
+        query_terms = [word.lower() for word in query_terms]
+        termToFreq = {}
+        for t in query_terms:
+            termToFreq[t] = termToFreq.get(t, 0) + 1
+
+        queryVector = len(self.idToTerm)*[float(0)]
+        for term, freq in termToFreq.items():
+            if term in self.termToId:
+                w = 1 + math.log10(freq)
+                idf = self.championsList[self.termToId[term]][0]
+                queryVector[self.termToId[term]] = w*idf
+        return queryVector
+
+    def inexact_query_champion(self, query_terms, x):
+        for k in self.champDocs:
+            self.docToVecChamp[k] = len(self.idToTerm)*[float(0)]
+
+        for k, v in self.championsList.items():
+            idf = v[0]
+            for i in range(1, len(v)):
+                t = v[i]
+                doc, w = t[0], t[1]
+                self.docToVecChamp[doc][k] = idf*w
+
+        queryVector = self.get_query_vector_champ(query_terms)
+        docToSimilarity = []
+        for doc, vec in self.docToVecChamp.items(): # for champions list only look at 
+            docToSimilarity.append((doc, self.cosine_similarity(queryVector, vec)))
+        # for d, s in docToSimilarity:
+        #     print(f"doc: {self.indToDoc[d]}, similarity: {s}")
+        docToSimilarity.sort(key = lambda x:x[1], reverse=True)
+        return [self.indToDoc[t[0]] for t in docToSimilarity[:x]]
 
 a = index("collection")
 query_terms = ["a", "cat", "jumped"]
 
-print(a.exact_query(query_terms, 2))
+# print(a.exact_query(query_terms, 2))
+
+print(a.inexact_query_champion(query_terms, 2))
