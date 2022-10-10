@@ -265,7 +265,6 @@ class index:
         leadersAndDist.sort(key=lambda x:x[1])
 
         res = []
-        k = 2
         for l, dist in leadersAndDist:
             cluster = self.leaderAndFollowers[l]
             # Sort each element in cluster by distance to query vector
@@ -303,6 +302,6 @@ query_terms = ["a", "cat", "jumped"]
 
 # print(a.exact_query(query_terms, 2))
 
-print(a.exact_query(query_terms, 2))
-print(a.inexact_query_index_elimination(query_terms, 2))
+#print(a.exact_query(query_terms, 2))
+# print(a.inexact_query_index_elimination(query_terms, 2))
 print(a.inexact_query_cluster_pruning(query_terms, 2))
