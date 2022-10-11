@@ -17,7 +17,7 @@ class index:
         self.docToVec = {}
         self.newPostingList = collections.defaultdict(list)
 
-        self.championsList = collections.defaultdict(list)
+        self.championList = collections.defaultdict(list)
         self.r = 2
         self.docToVecChamp = {}
         self.champDocs = set()
@@ -149,15 +149,14 @@ class index:
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
     def createChampionList(self):
-
         for k, v in self.newPostingList.items():
             docs = v[1:]
             docs.sort(key = lambda x: x[1], reverse = True)
             topR = docs[:self.r]
-            self.championsList[k].append(math.log10(len(self.indToDoc)/len(topR)))
-            self.championsList[k].extend(topR)
+            self.championList[k].append(math.log10(len(self.indToDoc)/len(topR)))
+            self.championList[k].extend(topR)
         
-        for k, v in self.championsList.items():
+        for k, v in self.championList.items():
             docs = v[1:]
             justDocs = [d[0] for d in docs]
             self.champDocs = self.champDocs.union(set(justDocs))
@@ -172,7 +171,7 @@ class index:
         for term, freq in termToFreq.items():
             if term in self.termToId:
                 w = 1 + math.log10(freq)
-                idf = self.championsList[self.termToId[term]][0]
+                idf = self.championList[self.termToId[term]][0]
                 queryVector[self.termToId[term]] = w*idf
         return queryVector
 
@@ -182,7 +181,7 @@ class index:
         for k in self.champDocs:
             self.docToVecChamp[k] = len(self.idToTerm)*[float(0)]
 
-        for k, v in self.championsList.items():
+        for k, v in self.championList.items():
             idf = v[0]
             for i in range(1, len(v)):
                 t = v[i]
@@ -231,7 +230,7 @@ class index:
         queryVector = self.get_query_vector_elimination(query_terms)
 
         docToSimilarity = []
-        for doc, vec in self.docToVec.items(): # for champions list only look at 
+        for doc, vec in self.docToVec.items(): 
             docToSimilarity.append((doc, self.cosine_similarity(queryVector, vec)))
         # for d, s in docToSimilarity:
         #     print(f"doc: {self.indToDoc[d]}, similarity: {s}")
