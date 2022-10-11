@@ -143,14 +143,18 @@ class index:
         docToSimilarity.sort(key = lambda x:x[1], reverse=True)
         endTime = time.time()
         print(f"Query executed in {endTime - startTime} seconds.")
+
+        # for id, similarity in docToSimilarity:
+        #     print(self.indToDoc[id], similarity)
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
     def createChampionList(self):
+
         for k, v in self.newPostingList.items():
-            self.championsList[k].append(v[0])
             docs = v[1:]
             docs.sort(key = lambda x: x[1], reverse = True)
             topR = docs[:self.r]
+            self.championsList[k].append(math.log10(len(self.indToDoc)/len(topR)))
             self.championsList[k].extend(topR)
         
         for k, v in self.championsList.items():
@@ -174,6 +178,7 @@ class index:
 
     def inexact_query_champion(self, query_terms, x):
         startTime = time.time()
+        
         for k in self.champDocs:
             self.docToVecChamp[k] = len(self.idToTerm)*[float(0)]
 
@@ -302,6 +307,6 @@ query_terms = ["a", "cat", "jumped"]
 
 # print(a.exact_query(query_terms, 2))
 
-#print(a.exact_query(query_terms, 2))
-# print(a.inexact_query_index_elimination(query_terms, 2))
-print(a.inexact_query_cluster_pruning(query_terms, 2))
+# print(a.inexact_query_champion(query_terms, 2))
+print(a.inexact_query_index_elimination(query_terms, 2))
+# print(a.inexact_query_cluster_pruning(query_terms, 2))
