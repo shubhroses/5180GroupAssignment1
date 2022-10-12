@@ -144,8 +144,8 @@ class index:
         endTime = time.time()
         print(f"Query executed in {endTime - startTime} seconds.")
 
-        # for id, similarity in docToSimilarity:
-        #     print(self.indToDoc[id], similarity)
+        for id, similarity in docToSimilarity:
+            print(self.indToDoc[id], similarity)
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
     def createChampionList(self):
@@ -304,8 +304,8 @@ class index:
 a = index("collection")
 query_terms = ["a", "cat", "jumped"]
 
-# print(a.exact_query(query_terms, 2))
+print(a.exact_query(query_terms, 2))
 
 # print(a.inexact_query_champion(query_terms, 2))
-print(a.inexact_query_index_elimination(query_terms, 2))
+# print(a.inexact_query_index_elimination(query_terms, 2))
 # print(a.inexact_query_cluster_pruning(query_terms, 2))
