@@ -5,6 +5,7 @@ import time
 import math
 import random
 
+o = open("output.txt", "a")
 class index:
     def __init__(self, path):
         self.indToDoc = {}
@@ -144,15 +145,15 @@ class index:
         endTime = time.time()
         print(f"Query executed in {endTime - startTime} seconds.")
 
-        for id, similarity in docToSimilarity:
-            print(self.indToDoc[id], similarity)
+        # for id, similarity in docToSimilarity:
+        #     print(self.indToDoc[id], similarity)
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
     def createChampionList(self):
         for k, v in self.newPostingList.items():
             docs = v[1:]
             docs.sort(key = lambda x: x[1], reverse = True)
-            topR = docs[:self.r]
+            topR = docs[:len(docs)//2+1]
             self.championList[k].append(math.log10(len(self.indToDoc)/len(topR)))
             self.championList[k].extend(topR)
         
@@ -302,10 +303,19 @@ class index:
 
 
 a = index("collection")
-query_terms = ["a", "cat", "jumped"]
+query_terms1 = ["a", "cat", "jumped"]
+query_terms2 = ["the", "dog", "ate"]
+query_terms3 = ["a", "horse", "in", "england"]
+query_terms4 = ["eating", "beans"]
+query_terms5 = ["chicken", "sandwich"]
 
-print(a.exact_query(query_terms, 2))
 
-# print(a.inexact_query_champion(query_terms, 2))
+print(a.exact_query(query_terms1, 10), file=o)
+print(a.exact_query(query_terms2, 10), file=o)
+print(a.exact_query(query_terms3, 10), file=o)
+print(a.exact_query(query_terms4, 10), file=o)
+print(a.exact_query(query_terms5, 10), file=o)
+
+# print(a.inexact_query_champion(query_terms1, 2), file=o)
 # print(a.inexact_query_index_elimination(query_terms, 2))
 # print(a.inexact_query_cluster_pruning(query_terms, 2))
