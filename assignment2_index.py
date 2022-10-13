@@ -75,6 +75,8 @@ class index:
             self.curDocID += 1
 
     def convertDocumentsToVector(self):
+        startTime = time.time()
+
         for k in self.indToDoc.keys():
             self.docToVec[k] = len(self.idToTerm)*[float(0)]
 
@@ -84,6 +86,9 @@ class index:
                 t = v[i]
                 doc, w = t[0], t[1]
                 self.docToVec[doc][k] = idf*w
+
+        endTime = time.time()
+        print(f'Converting Collection of Documents to Vectors finished in {endTime-startTime} seconds')
 
     def createNewPostringList(self):
         startTime = time.time()
@@ -150,6 +155,7 @@ class index:
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
     def createChampionList(self):
+        startTime = time.time()
         for k, v in self.newPostingList.items():
             docs = v[1:]
             docs.sort(key = lambda x: x[1], reverse = True)
@@ -161,6 +167,8 @@ class index:
             docs = v[1:]
             justDocs = [d[0] for d in docs]
             self.champDocs = self.champDocs.union(set(justDocs))
+        endTime = time.time()
+        print(f"Finished building champion's list in {endTime - startTime} seconds")
 
     def get_query_vector_champ(self, query_terms):
         query_terms = [word.lower() for word in query_terms]
@@ -233,30 +241,36 @@ class index:
         docToSimilarity = []
         for doc, vec in self.docToVec.items(): 
             docToSimilarity.append((doc, self.cosine_similarity(queryVector, vec)))
-        # for d, s in docToSimilarity:
-        #     print(f"doc: {self.indToDoc[d]}, similarity: {s}")
         docToSimilarity.sort(key = lambda x:x[1], reverse=True)
+        for d, s in docToSimilarity:
+            print(f"doc: {self.indToDoc[d]}, similarity: {s}")
         endTime = time.time()
-        print(f"Query executed in {endTime - startTime} seconds.")
+        print(f"Index Elimination Query executed in {endTime - startTime} seconds.")
         return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
 
     def setLeaders(self):
+        startTime = time.time()
         self.leadersArr = random.sample(range(0, len(self.indToDoc)), int(math.sqrt(len(self.indToDoc))))
         self.leadersSet = set(self.leadersArr)
 
         for doc in range(len(self.indToDoc)):
-            docVec = self.docToVec[doc]
-            distNearest = float("-inf")
-            nearest = None
-            for l in self.leadersArr:
-                newDist = self.cosine_similarity(docVec, self.docToVec[l])
-                if newDist >= distNearest:
-                    distNearest = newDist
-                    nearest = l
-            self.docToNearestLeader[doc] = nearest
+            if doc not in self.leadersSet:
+                docVec = self.docToVec[doc]
+                distNearest = float("-inf")
+                nearest = None
+                for l in self.leadersArr:
+                    newDist = self.cosine_similarity(docVec, self.docToVec[l])
+                    if newDist >= distNearest:
+                        distNearest = newDist
+                        nearest = l
+                self.docToNearestLeader[doc] = nearest
+            else:
+                self.docToNearestLeader[doc] = doc
 
         for k, v in self.docToNearestLeader.items():
             self.leaderAndFollowers[v].append(k)
+        endTime = time.time()
+        print(f"Finished setting leaders in {endTime - startTime} seconds")
 
     def inexact_query_cluster_pruning(self, query_terms, k):
         startTime = time.time()
@@ -303,12 +317,7 @@ class index:
 
 
 a = index("collection")
-query_terms1 = ["a", "cat", "jumped"]
-query_terms2 = ["the", "dog", "ate"]
-query_terms3 = ["a", "horse", "in", "england"]
-query_terms4 = ["eating", "beans"]
-query_terms5 = ["chicken", "sandwich"]
-
+query_terms = ["a", "cat", "jumped"]
 
 print(a.exact_query(query_terms1, 10), file=o)
 print(a.exact_query(query_terms2, 10), file=o)
