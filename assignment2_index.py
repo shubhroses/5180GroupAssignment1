@@ -319,6 +319,12 @@ class index:
 a = index("collection")
 query_terms = ["a", "cat", "jumped"]
 
+query_terms1 = ["American", "Party", "Election", "Republican", "Democrat", "interference", "War", "Crime", "Russian", "Spy", "Rigging"]
+query_terms2 = ["Young", "Girl", "Family", "Captured", "Miracle", "War", "economy", "human", "nature", "violence", "soldier"]
+query_terms3 = ["German", "Manufactured", "Automobile", "Car", "tires", "armored", "safe", "expensive", "money", "tax", "mileage"]
+query_terms4 = ["Bad", "Police", "Officer", "Captured", "wrong", "person", "imprisoned", "mistake", "jailed", "unpunished", "criminal"]
+query_terms5 = ["Soviet", "Communist", "Russian", "Party", "War", "chaotic", "regime", "battlefield", "negotiation", "native", "guerillas"]
+
 print(a.exact_query(query_terms1, 10), file=o)
 print(a.exact_query(query_terms2, 10), file=o)
 print(a.exact_query(query_terms3, 10), file=o)
