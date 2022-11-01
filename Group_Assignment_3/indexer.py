@@ -6,6 +6,7 @@ from org.apache.lucene.analysis.standard import StandardAnalyzer
 from org.apache.lucene import document
 from org.apache.lucene.document import Document, Field
 from org.apache.lucene.index import IndexWriter, IndexWriterConfig
+from org.apache.lucene.search.similarities import TFIDFSimilarity
 from org.apache.lucene.store import FSDirectory
 from org.apache.lucene.util import Version
  
@@ -14,6 +15,7 @@ if __name__ == "__main__":
     indexPath = File("index/").toPath() #from java. io import File
     indexDir = FSDirectory.open(indexPath)
     writerConfig = IndexWriterConfig(StandardAnalyzer())
+    
     writer = IndexWriter(indexDir, writerConfig)
 
     print ("%d docs in index" % writer.numRamDocs())
