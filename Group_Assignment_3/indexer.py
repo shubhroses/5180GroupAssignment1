@@ -9,6 +9,7 @@ from org.apache.lucene.index import IndexWriter, IndexWriterConfig
 from org.apache.lucene.search.similarities import TFIDFSimilarity
 from org.apache.lucene.store import FSDirectory
 from org.apache.lucene.util import Version
+from helper import get_docs
  
 if __name__ == "__main__":
     lucene.initVM()
@@ -20,12 +21,28 @@ if __name__ == "__main__":
 
     print ("%d docs in index" % writer.numRamDocs())
     print ("Reading lines from sys.stdin...")
-    for n, l in enumerate(sys.stdin):
+
+    docIdToText = get_docs()
+    for k, v in docIdToText.items():
         doc = Document()
-        doc.add(Field("text", l, document.TextField.TYPE_STORED))
+        doc.add(Field("text", " ".join(v), document.TextField.TYPE_STORED))
         writer.addDocument(doc)
         print(doc)
-    print ("Indexed %d lines from stdin (%d docs in index)" % (n, writer.numRamDocs()))
+
+    print ("Indexed %d docs in index)" % (writer.numRamDocs()))
     print ("Closing index of %d docs..." % writer.numRamDocs())
+
+    # print ("%d docs in index" % writer.numRamDocs())
+    # print ("Reading lines from sys.stdin...")
+    # for n, l in enumerate(sys.stdin):
+    #     doc = Document()
+    #     doc.add(Field("text", l, document.TextField.TYPE_STORED))
+    #     """
+    #     ALong with text, add field of id.
+    #     """
+    #     writer.addDocument(doc)
+    #     print(doc)
+    # print ("Indexed %d docs in index)" % (writer.numRamDocs()))
+    # print ("Closing index of %d docs..." % writer.numRamDocs())
     writer.close()
 
