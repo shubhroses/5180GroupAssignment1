@@ -11,6 +11,7 @@ from org.apache.lucene.search import similarities
 from org.apache.lucene.search.similarities import TFIDFSimilarity
 from org.apache.lucene.search.similarities import BM25Similarity
 from org.apache.lucene.search.similarities import BooleanSimilarity
+from org.apache.lucene.search.similarities import ClassicSimilarity
 
 from org.apache.lucene.index import IndexReader, DirectoryReader
 from org.apache.lucene.queryparser.classic import QueryParser
@@ -24,13 +25,13 @@ if __name__ == "__main__":
     indexDir = FSDirectory.open(indexPath)
     reader = DirectoryReader.open(indexDir)
 
-    similarities.BooleanSimilarity()
-    similarities.BM25Similarity()
-    similarities.TFIDFSimilarity()
-
+    # similarities.BooleanSimilarity()
+    # similarities.BM25Similarity()
+    # similarities.TFIDFSimilarity()
+    
     searcher = IndexSearcher(reader)
-
-    searcher.setSimilarity(BM25Similarity())
+    searcher.similarity = ClassicSimilarity()
+    # searcher.setSimilarity(BM25Similarity())
     # searcher.setSimilarity(TFIDFSimilarity())
 
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     MAX = 1000
     hits = searcher.search(query, MAX)
 
-    # print(searcher.explain(query, 1))
+    print(searcher.explain(query, 1))
 
     # print ("Found %d document(s) that matched query '%s':" % (hits.totalHits.value, query))
     for hit in hits.scoreDocs:
