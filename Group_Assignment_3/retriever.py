@@ -34,14 +34,10 @@ if __name__ == "__main__":
     # searcher.setSimilarity(BM25Similarity())
     # searcher.setSimilarity(TFIDFSimilarity())
 
-
     
     indexReader = searcher.getIndexReader()
 
     # print(searcher.getSimilarity())
-
-
-    
 
     # print(f"Number of docs {indexReader.numDocs()}")
     

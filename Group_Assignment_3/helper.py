@@ -1,25 +1,20 @@
 import collections
 
 def get_docs(path):
-    docNameToId = {}
-    docIdToName = {}
     docIdToText = collections.defaultdict(list)
 
     with open(path) as file:
-        docIdToText = collections.defaultdict(list)
+        line = file.readline()
+        i = 0
 
-        with open(path) as file:
+        while line:
+            words = line.split()
+            if words and words[0] == "*TEXT":
+                curDocId = int(words[1]) # Can change it back to string if necessary
+            else:
+                for word in words:   
+                    docIdToText[curDocId].append(word)
             line = file.readline()
-            i = 0
-
-            while line:
-                words = line.split()
-                if words and words[0] == "*TEXT":
-                    curDocId = int(words[1]) # Can change it back to string if necessary
-                else:
-                    for word in words:   
-                        docIdToText[curDocId].append(word)
-                line = file.readline()
     return docIdToText
 
 def get_queue(path):
