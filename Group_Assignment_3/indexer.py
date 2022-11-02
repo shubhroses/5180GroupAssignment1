@@ -22,7 +22,7 @@ if __name__ == "__main__":
     print ("%d docs in index" % writer.numRamDocs())
     print ("Reading lines from sys.stdin...")
 
-    docIdToText = get_docs()
+    docIdToText = get_docs("Group_Assignment_3/time/test.all")
     for k, v in docIdToText.items():
         doc = Document()
         doc.add(Field("text", " ".join(v), document.TextField.TYPE_STORED))
