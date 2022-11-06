@@ -26,7 +26,7 @@ if __name__ == "__main__":
     for k, v in docIdToText.items():
         doc = Document()
         doc.add(Field("text", " ".join(v), document.TextField.TYPE_STORED))
-        writer.addDocument(doc)
+        writer.addDocument(doc) # TODO: Document id to index 
         print(doc)
 
     print ("Indexed %d docs in index)" % (writer.numRamDocs()))
