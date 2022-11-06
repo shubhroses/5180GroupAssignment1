@@ -44,17 +44,20 @@ if __name__ == "__main__":
     # print(f"Number of docs {indexReader.numDocs()}")
 
     
-    query = QueryParser("text", analyzer).parse("A cat jumped")
+    query = QueryParser("text", analyzer).parse("the cat barked")
     MAX = 1000
     hits = searcher.search(query, MAX)
 
+    print(indexReader.getTermVector(0, "text"))
 
-    for i in range(3):
-        print(searcher.explain(query, i))
+    # for i in range(3):
+    #     print("NEW")
+    #     print(searcher.explain(query, i))
+        
 
     # print ("Found %d document(s) that matched query '%s':" % (hits.totalHits.value, query))
     for hit in hits.scoreDocs:
         # print(hit)
-        print(hit.score, hit.doc, hit.toString())
+        # print(hit.score, hit.doc, hit.toString())
         doc = searcher.doc(hit.doc)
         #print(doc.get("text").encode("utf-8"))

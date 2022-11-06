@@ -25,7 +25,9 @@ if __name__ == "__main__":
     docIdToText = get_docs("Group_Assignment_3/time/test.all")
     for k, v in docIdToText.items():
         doc = Document()
-        doc.add(Field("text", " ".join(v), document.TextField.TYPE_STORED))
+        ft = document.FieldType(document.TextField.TYPE_STORED)
+        ft.setStoreTermVectors(True)
+        doc.add(Field("text", " ".join(v), ft))
         writer.addDocument(doc) # TODO: Document id to index 
         print(doc)
 
