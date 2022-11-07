@@ -23,7 +23,7 @@ from org.apache.lucene.util import Version
 if __name__ == "__main__":
     lucene.initVM()
     analyzer = StandardAnalyzer()
-    indexPath = File("index/").toPath() #from java. io import File
+    indexPath = File("index").toPath() #from java. io import File
     indexDir = FSDirectory.open(indexPath)
     reader = DirectoryReader.open(indexDir)
 
@@ -58,6 +58,7 @@ if __name__ == "__main__":
     # print ("Found %d document(s) that matched query '%s':" % (hits.totalHits.value, query))
     for hit in hits.scoreDocs:
         # print(hit)
-        # print(hit.score, hit.doc, hit.toString())
+        print(hit.score, hit.doc, hit.toString())
         doc = searcher.doc(hit.doc)
+        # print(doc)
         #print(doc.get("text").encode("utf-8"))

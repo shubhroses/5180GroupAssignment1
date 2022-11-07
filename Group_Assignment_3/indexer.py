@@ -13,20 +13,17 @@ from helper import get_docs
  
 if __name__ == "__main__":
     lucene.initVM()
+    
     indexPath = File("index/").toPath() #from java. io import File
     indexDir = FSDirectory.open(indexPath)
     writerConfig = IndexWriterConfig(StandardAnalyzer())
-    
     writer = IndexWriter(indexDir, writerConfig)
 
-    print ("%d docs in index" % writer.numRamDocs())
-    print ("Reading lines from sys.stdin...")
-
     docIdToText = get_docs("Group_Assignment_3/time/test.all")
+
     for k, v in docIdToText.items():
         doc = Document()
         ft = document.FieldType(document.TextField.TYPE_STORED)
-        ft.setStoreTermVectors(True)
         doc.add(Field("text", " ".join(v), ft))
         writer.addDocument(doc) # TODO: Document id to index 
         print(doc)
