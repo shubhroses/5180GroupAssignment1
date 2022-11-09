@@ -45,6 +45,7 @@ class index:
 		self.indToDoc = {}
 		self.docToVec = {}
 		self.newPostingList = collections.defaultdict(list)
+		self.reader = None
 
 		self.createNewPostringList()
 		self.convertDocumentsToVector()
@@ -76,7 +77,7 @@ class index:
 		writerConfig = IndexWriterConfig(StandardAnalyzer())
 		writer = IndexWriter(indexDir, writerConfig)
 
-		docIdToText = self.get_docs_for_lucene("Group_Assignment_3/time/TIME.ALL")
+		docIdToText = self.get_docs_for_lucene(self.path + "time/TIME.ALL")
 
 		for k, v in docIdToText.items():
 			doc = Document()
@@ -96,6 +97,12 @@ class index:
 		print ("Closing index of %d docs..." % writer.numRamDocs())
 
 		writer.close()
+
+
+		analyzer = StandardAnalyzer()
+		indexPath = File("index").toPath() #from java. io import File
+		indexDir = FSDirectory.open(indexPath)
+		self.reader = DirectoryReader.open(indexDir)
 
 	def rocchio(self, query_terms, pos_feedback, neg_feedback, alpha, beta, gamma, q):
 		relevant_doc_vecs = [np.array(self.docToVec[i]) for i in pos_feedback]
@@ -355,9 +362,76 @@ class index:
 			print(f"New Query Vector: {qVec}")
 
 		return [p, r, mp]
+
+	def get_stats_pseudo(self, qId, k):
+		idToQueue = self.get_queue(self.path + "time/TIME.QUE")
+		queryToRelatedDocs = self.get_relevance(self.path + "time/TIME.REL")
+		
+		all_documents = set(self.indToDoc.keys())
+		p = []
+		r = []
+		mp = []
+
+		qText = idToQueue[qId]
+		qVec = np.array(self.get_query_vector(qText))
+
+		# relatedDocs = None
+
+		print(f"Query ID: {qId}, Query text: {qText}")
+		for i in range(6):
+			queryResultArr = self.exact_query_using_vector(qVec, k)
+			queryResults = set(queryResultArr)
+
+			# if not relatedDocs:
+			# 	relatedDocs = set(queryResultArr[:3])
+			relatedDocs = set(queryToRelatedDocs[qId])
+
+			pos_feedback = list(queryResults.intersection(set(queryResultArr[:3])))
+			neg_feedback = list(queryResults.difference(set(queryResultArr[:3])))
+
+			print(f"Iterations: {i}")
+			print(f"Positive Feedback: {pos_feedback}")
+			print(f"Negative Feedback: {neg_feedback}")
+			relevant = relatedDocs
+			non_relevant = all_documents.difference(relevant)
+
+			retrieved = queryResults
+			not_retrieved = all_documents.difference(retrieved)
+
+			tp = relevant.intersection(retrieved)
+			fp = non_relevant.intersection(retrieved)
+			fn = relevant.intersection(not_retrieved)
+
+			precision = len(tp)/(len(tp) + len(fp))
+			recall = len(tp)/(len(tp) + len(fn))
+
+			rCount = 0
+			curMap = 0
+			for ind, res in enumerate(queryResultArr, 1):
+				if res in relevant:
+					rCount += 1
+					curMap += float(rCount)/float(ind)
+			if rCount > 0:
+				curMap = curMap/float(rCount)
+
+			print(f"Precision: {precision}, Recall: {recall}, MAP: {curMap}")
+
+			p.append([i, precision])
+			r.append([i, recall])
+			mp.append([i, curMap])
+
+			qVec = self.rocchio(qText, pos_feedback, neg_feedback, alpha=1.0, beta=0.75, gamma=0.15, q=qVec)
+			print(f"New Query Vector: {qVec}")
+
+		return [p, r, mp]
 	
 
 if __name__ == "__main__":
 	a = index("Group_Assignment_3/")
 
-	p, q, mp = a.get_stats(qId = 12, k=50)
+	a.get_stats(qId = 6, k=50)
+
+	a.get_stats(qId = 9, k=50)
+
+	a.get_stats(qId = 12, k=50)
+
