@@ -42,10 +42,6 @@ class index:
 			new_query = alpha*q + beta*(1/len(relevant_doc_vecs))*(sum(relevant_doc_vecs)) - gamma*(1/len(non_relevant_doc_vecs))*(sum(non_relevant_doc_vecs))
 		return new_query
 	
-	def query(self, query_terms, k):
-	#function for exact top K retrieval using cosine similarity
-	#Returns at the minimum the document names of the top K documents ordered in decreasing order of similarity score
-		pass
 	
 	def print_dict(self):
     #function to print the terms and posting list in the index
@@ -199,6 +195,96 @@ class index:
 		# for id, similarity in docToSimilarity:
 		#     print(self.indToDoc[id], similarity)
 		return [self.indToDoc[t[0]] for t in docToSimilarity[:k]]
+
+	def get_queue(self, path):
+		idToQueue = collections.defaultdict(list)
+
+		with open(path) as file:
+			line = file.readline()
+			while line:
+				words = line.split()
+				if words and words[0] == "*STOP":
+					break
+				if words and words[0] == "*FIND":
+					query_id = int(words[1])
+				else:
+					for word in words:   
+						idToQueue[query_id].append(word)
+				line = file.readline()
+		
+		return idToQueue
+
+	def get_relevance(self, path):
+		queryToRelatedDocs = collections.defaultdict(list)
+
+		with open(path) as file:
+			line = file.readline()
+			while line:
+				docs = line.split()
+				if docs:
+					cur_doc = int(docs[0])
+					for doc in docs[1:]:
+						queryToRelatedDocs[cur_doc].append(int(doc))
+				line = file.readline()
+
+		return queryToRelatedDocs
+
+	def get_stats(self, qId, k):
+		idToQueue = self.get_queue(self.path + "time/TIME.QUE")
+		queryToRelatedDocs = self.get_relevance(self.path + "time/TIME.REL")
+		
+		all_documents = set(self.indToDoc.keys())
+		p = []
+		r = []
+		mp = []
+
+		qText = idToQueue[qId]
+		qVec = np.array(self.get_query_vector(qText))
+
+		print(f"Query ID: {qId}, Query text: {qText}")
+		for i in range(6):
+			queryResultArr = self.exact_query_using_vector(qVec, k)
+			queryResults = set(queryResultArr)
+
+			relatedDocs = set(queryToRelatedDocs[qId])
+
+			pos_feedback = list(queryResults.intersection(relatedDocs))
+			neg_feedback = list(queryResults.difference(relatedDocs))
+
+			print(f"Iterations: {i}")
+			print(f"Positive Feedback: {pos_feedback}")
+			print(f"Negative Feedback: {neg_feedback}")
+			relevant = relatedDocs
+			non_relevant = all_documents.difference(relevant)
+
+			retrieved = queryResults
+			not_retrieved = all_documents.difference(retrieved)
+
+			tp = relevant.intersection(retrieved)
+			fp = non_relevant.intersection(retrieved)
+			fn = relevant.intersection(not_retrieved)
+
+			precision = len(tp)/(len(tp) + len(fp))
+			recall = len(tp)/(len(tp) + len(fn))
+
+			rCount = 0
+			curMap = 0
+			for ind, res in enumerate(queryResultArr, 1):
+				if res in relevant:
+					rCount += 1
+					curMap += float(rCount)/float(ind)
+			if rCount > 0:
+				curMap = curMap/float(rCount)
+
+
+			p.append([i, precision])
+			r.append([i, recall])
+			mp.append([i, curMap])
+
+			qVec = self.rocchio(qText, pos_feedback, neg_feedback, alpha=1.0, beta=0.75, gamma=0.15, q=qVec)
+			print(f"New Query Vector: {qVec}")
+
+		return [p, r, mp]
 	
 
 if __name__ == "__main__":
