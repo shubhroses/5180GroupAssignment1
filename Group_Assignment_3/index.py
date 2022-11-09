@@ -429,9 +429,15 @@ class index:
 if __name__ == "__main__":
 	a = index("Group_Assignment_3/")
 
-	a.get_stats(qId = 6, k=50)
+	a.get_stats(qId = 6, k=9)
 
-	a.get_stats(qId = 9, k=50)
+	# a.get_stats(qId = 9, k=50)
 
-	a.get_stats(qId = 12, k=50)
+	# a.get_stats(qId = 12, k=50)
+
+	# a.get_stats_pseudo(qId = 6, k=50)
+
+	# a.get_stats_pseudo(qId = 9, k=50)
+
+	# a.get_stats_pseudo(qId = 12, k=50)
 
