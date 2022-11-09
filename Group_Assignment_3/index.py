@@ -1,3 +1,31 @@
+import sys
+import lucene
+ 
+from java.io import File
+from org.apache.lucene.analysis.standard import StandardAnalyzer
+from org.apache.lucene import document
+from org.apache.lucene.document import Document, Field
+from org.apache.lucene.index import IndexWriter, IndexWriterConfig, IndexOptions
+from org.apache.lucene.search.similarities import TFIDFSimilarity
+from org.apache.lucene.store import FSDirectory
+from org.apache.lucene.util import Version
+
+
+from org.apache.lucene.search import IndexSearcher
+from org.apache.lucene.search import similarities
+
+from org.apache.lucene.search.similarities import TFIDFSimilarity
+from org.apache.lucene.search.similarities import BM25Similarity
+from org.apache.lucene.search.similarities import BooleanSimilarity
+from org.apache.lucene.search.similarities import ClassicSimilarity
+from org.apache.lucene.search.similarities import Similarity
+
+
+from org.apache.lucene.index import IndexReader, DirectoryReader
+from org.apache.lucene.queryparser.classic import QueryParser
+from org.apache.lucene.store import FSDirectory
+from org.apache.lucene.util import Version
+
 #Python 3.0
 import re
 import os
@@ -20,13 +48,54 @@ class index:
 
 		self.createNewPostringList()
 		self.convertDocumentsToVector()
+		self.buildIndex()
 		pass
 
+	def get_docs_for_lucene(self, path):
+		docIdToText = collections.defaultdict(list)
+
+		with open(path) as file:
+			line = file.readline()
+			i = 0
+
+			while line:
+				words = line.split()
+				if words and words[0] == "*TEXT":
+					curDocId = int(words[1]) # Can change it back to string if necessary
+				else:
+					for word in words:   
+						docIdToText[curDocId].append(word)
+				line = file.readline()
+		return docIdToText
+
+
 	def buildIndex(self):
-		#function to read documents from collection, tokenize and build the index with tokens
-		# implement additional functionality to support relevance feedback
-		#use unique document integer IDs
-		pass
+		lucene.initVM()
+		indexPath = File("index/").toPath() #from java. io import File
+		indexDir = FSDirectory.open(indexPath)
+		writerConfig = IndexWriterConfig(StandardAnalyzer())
+		writer = IndexWriter(indexDir, writerConfig)
+
+		docIdToText = self.get_docs_for_lucene("Group_Assignment_3/time/TIME.ALL")
+
+		for k, v in docIdToText.items():
+			doc = Document()
+			
+			fieldType = document.FieldType()
+			fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS)
+			fieldType.setStored(True)
+			fieldType.setTokenized(True)
+			fieldType.setOmitNorms(False)
+
+			doc.add(Field("myID", k, fieldType))
+			doc.add(Field("content", " ".join(v), fieldType))
+
+			writer.addDocument(doc)
+
+		print ("Indexed %d docs in index" % (writer.numRamDocs()))
+		print ("Closing index of %d docs..." % writer.numRamDocs())
+
+		writer.close()
 
 	def rocchio(self, query_terms, pos_feedback, neg_feedback, alpha, beta, gamma, q):
 		relevant_doc_vecs = [np.array(self.docToVec[i]) for i in pos_feedback]
@@ -276,6 +345,7 @@ class index:
 			if rCount > 0:
 				curMap = curMap/float(rCount)
 
+			print(f"Precision: {precision}, Recall: {recall}, MAP: {curMap}")
 
 			p.append([i, precision])
 			r.append([i, recall])
@@ -290,6 +360,4 @@ class index:
 if __name__ == "__main__":
 	a = index("Group_Assignment_3/")
 
-	query_terms1 = ["a", "cat", "jumped"]
-
-	print(a.exact_query(query_terms1, 3))
+	p, q, mp = a.get_stats(qId = 12, k=50)
